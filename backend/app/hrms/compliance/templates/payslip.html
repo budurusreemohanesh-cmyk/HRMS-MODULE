@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payslip</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .company-name { font-size: 24px; font-weight: bold; margin: 0; }
+        .payslip-title { font-size: 18px; margin: 5px 0 0; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #f9f9f9; }
+        .half-width { width: 50%; vertical-align: top; }
+        .no-border td { border: none; padding: 4px 8px; }
+        .text-right { text-align: right; }
+        .summary-box { border: 1px solid #333; padding: 15px; background: #f9f9f9; }
+        .summary-box h3 { margin-top: 0; }
+        .footer { text-align: center; font-size: 12px; margin-top: 40px; color: #777; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="company-name">{{ company.name }}</h1>
+        <p class="payslip-title">Payslip for the month of {{ payroll_period.start_date.strftime('%B %Y') }}</p>
+    </div>
+
+    <table>
+        <tr>
+            <td class="half-width">
+                <table class="no-border">
+                    <tr><td><strong>Employee Code:</strong></td><td>{{ employee.employee_number }}</td></tr>
+                    <tr><td><strong>Name:</strong></td><td>{{ employee.first_name }} {{ employee.last_name }}</td></tr>
+                    <tr><td><strong>Department:</strong></td><td>{{ department.name if department else 'N/A' }}</td></tr>
+                    <tr><td><strong>Designation:</strong></td><td>{{ designation.name if designation else 'N/A' }}</td></tr>
+                </table>
+            </td>
+            <td class="half-width">
+                <table class="no-border">
+                    <tr><td><strong>Bank A/C No:</strong></td><td>{{ bank.account_number if bank else 'N/A' }}</td></tr>
+                    <tr><td><strong>PF No:</strong></td><td>{{ statutory.pf_number if statutory else 'N/A' }}</td></tr>
+                    <tr><td><strong>UAN:</strong></td><td>{{ statutory.uan if statutory else 'N/A' }}</td></tr>
+                    <tr><td><strong>ESI No:</strong></td><td>{{ statutory.esi_number if statutory else 'N/A' }}</td></tr>
+                    <tr><td><strong>Total Days:</strong></td><td>{{ payslip.total_working_days }}</td></tr>
+                    <tr><td><strong>Paid Days:</strong></td><td>{{ payslip.payment_days }}</td></tr>
+                    <tr><td><strong>LWP:</strong></td><td>{{ payslip.leave_without_pay }}</td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table>
+        <tr>
+            <th class="half-width">Earnings</th>
+            <th class="half-width">Deductions</th>
+        </tr>
+        <tr>
+            <td class="half-width">
+                <table class="no-border" style="width: 100%;">
+                    {% for item in earnings %}
+                    <tr>
+                        <td>{{ item.salary_component.name }}</td>
+                        <td class="text-right">₹{{ "%.2f"|format(item.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td><strong>Total Earnings</strong></td>
+                        <td class="text-right"><strong>₹{{ "%.2f"|format(payslip.gross_pay) }}</strong></td>
+                    </tr>
+                </table>
+            </td>
+            <td class="half-width">
+                <table class="no-border" style="width: 100%;">
+                    {% for item in deductions %}
+                    <tr>
+                        <td>{{ item.salary_component.name }}</td>
+                        <td class="text-right">₹{{ "%.2f"|format(item.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td><strong>Total Deductions</strong></td>
+                        <td class="text-right"><strong>₹{{ "%.2f"|format(payslip.total_deduction) }}</strong></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <div class="summary-box">
+        <h3>Net Pay: ₹{{ "%.2f"|format(payslip.net_pay) }}</h3>
+        <p><em>(Amount in words: Rupees {{ net_pay_words }} Only)</em></p>
+    </div>
+
+    <div class="footer">
+        <p>This is a computer-generated document. No signature is required.</p>
+    </div>
+
+</body>
+</html>
